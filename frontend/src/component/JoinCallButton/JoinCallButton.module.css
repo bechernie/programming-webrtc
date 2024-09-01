@@ -1,0 +1,22 @@
+.button {
+  width: 143px;
+  margin-right: 0.75rem;
+}
+
+.call {
+  background-color: green;
+  color: white;
+}
+
+.call:hover {
+  background-color: darkgreen;
+}
+
+.leave {
+  background-color: #ca0;
+  color: black;
+}
+
+.leave:hover {
+  background-color: #a80;
+}

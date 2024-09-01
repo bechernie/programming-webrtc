@@ -12,19 +12,3 @@ video.self {
   max-width: 320px;
   margin-bottom: 0.75rem;
 }
-
-.callButton {
-  background-color: green;
-  color: white;
-  width: 143px;
-  margin-right: 0.75rem;
-}
-
-.callButton:hover {
-  background-color: darkgreen;
-}
-
-.leaveButton {
-  background-color: #ca0;
-  color: black;
-}
