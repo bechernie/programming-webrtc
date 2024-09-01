@@ -11,7 +11,7 @@ function App() {
         <JoinCallButton />
       </Header>
       <section>
-        <h2 className={styles.preserveAccess}>Streaming Videos</h2>
+        <h2 className={styles.preserveAccessibility}>Streaming Videos</h2>
         <Video poster={"placeholder.png"} className={styles.self} />
         <Video muted={false} poster={"placeholder.png"} />
       </section>
