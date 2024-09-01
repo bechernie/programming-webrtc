@@ -1,24 +1,24 @@
 .header {
-    margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .header > h1 {
-    margin-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 @media screen and (width >= 500px) {
-    .header {
-        display: flex;
-        flex-direction: row-reverse;
-        align-items: baseline;
-        justify-content: flex-end;
-    }
+  .header {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: baseline;
+    justify-content: flex-end;
+  }
 
-    .header > * {
-        flex: 0 0 auto;
-    }
+  .header > * {
+    flex: 0 0 auto;
+  }
 
-    .header > h1 {
-        margin-bottom: 0;
-    }
+  .header > h1 {
+    margin-bottom: 0;
+  }
 }
