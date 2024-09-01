@@ -3,12 +3,12 @@
   margin-right: 0.75rem;
 }
 
-.call {
+.join {
   background-color: green;
   color: white;
 }
 
-.call:hover {
+.join:hover {
   background-color: darkgreen;
 }
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 function JoinCallButton() {
   const [joined, setJoined] = useState(false);
-  const classes = [styles.button, joined ? styles.call : styles.leave]
+  const classes = [styles.button, joined ? styles.leave : styles.join]
     .filter(Boolean)
     .join(" ");
   return (
@@ -12,7 +12,7 @@ function JoinCallButton() {
       className={classes}
       onClick={() => setJoined((prevJoined) => !prevJoined)}
     >
-      {joined ? "Join Call" : "Leave Call"}
+      {joined ? "Leave Call" : "Join Call"}
     </Button>
   );
 }
