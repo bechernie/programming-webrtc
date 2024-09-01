@@ -1,6 +1,6 @@
-import Button from "../Button/Button.tsx";
 import styles from "./JoinCallButton.module.css";
 import { useState } from "react";
+import Button from "@components/Button/Button.tsx";
 
 function JoinCallButton() {
   const [joined, setJoined] = useState(false);

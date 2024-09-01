@@ -1,7 +1,7 @@
 import styles from "./App.module.css";
-import Video from "./components/Video/Video.tsx";
-import Header from "./components/Header/Header.tsx";
-import JoinCallButton from "./components/JoinCallButton/JoinCallButton.tsx";
+import Header from "@components/Header/Header.tsx";
+import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
+import Video from "@components/Video/Video.tsx";
 
 function App() {
   return (
