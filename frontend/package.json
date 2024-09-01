@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . && stylelint \"**/*.css\" && prettier . --check",
-    "format": "eslint . --fix && stylelint \"**/*.css\" --fix && prettier . --write",
+    "fix": "eslint . --fix && stylelint \"**/*.css\" --fix && prettier . --write",
     "preview": "vite preview"
   },
   "dependencies": {
