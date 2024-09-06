@@ -10,11 +10,23 @@ function useSignalingChannel(namespace: string) {
     });
 
     socket.on("connect", function () {
-      console.log("Successfully connected to signaling channel");
+      console.log("connect");
+    });
+
+    socket.on("connected peer", function () {
+      console.log("connected peer");
+    });
+
+    socket.on("disconnected peer", function () {
+      console.log("connected peer");
+    });
+
+    socket.on("signal", function () {
+      console.log("signal");
     });
 
     socket.on("disconnect", function () {
-      console.log("Successfully disconnected from signaling channel");
+      console.log("disconnect");
     });
 
     setSignalingChannel(socket);
