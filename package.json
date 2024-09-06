@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "start:backend": "npm run start --workspace backend",
+    "start:frontend": "npm run dev --workspace frontend"
   },
   "workspaces": [
     "backend",
@@ -14,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "husky": "^9.1.5",
     "lint-staged": "^15.2.10"
   }
 }
