@@ -29,12 +29,12 @@ function useSignalingChannel(
     });
 
     setSignalingChannel(socket);
-  }, []);
+  }, [namespace, onConnect, onConnectedPeer]);
 
   return {
     joinCall: () => signalingChannel?.connect(),
     leaveCall: () => signalingChannel?.disconnect(),
-    signal: (data: Record<string, unknown>) =>
+    sendSignal: (data: Record<string, unknown>) =>
       signalingChannel?.emit("signal", data),
   };
 }

@@ -4,7 +4,7 @@ import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import Video from "@components/Video/Video.tsx";
 import useNamespace from "@hooks/useNamespace.ts";
 import useSignalingChannel from "@hooks/useSignalingChannel.ts";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface Self {
   rtcConfig?: RTCConfiguration;
@@ -38,20 +38,27 @@ function App() {
 
   const selfRef = useRef<HTMLVideoElement>(null);
 
-  const peer: Peer = {
-    connection: new RTCPeerConnection(self.rtcConfig),
-  };
+  const peer: Peer = useMemo(
+    () => ({
+      connection: new RTCPeerConnection(self.rtcConfig),
+    }),
+    [self.rtcConfig],
+  );
 
-  const { joinCall, leaveCall, signal } = useSignalingChannel(
+  const onConnect = useCallback(() => {
+    console.log("onConnect");
+    establishCallFeature(self, peer);
+  }, [self, peer]);
+
+  const onConnectedPeer = useCallback(() => {
+    console.log("onConnectedPeer");
+    setSelf((prevState) => ({ ...prevState, isPolite: true }));
+  }, []);
+
+  const { joinCall, leaveCall, sendSignal } = useSignalingChannel(
     namespace,
-    function () {
-      console.log("onConnect");
-      establishCallFeature(self, peer);
-    },
-    function () {
-      console.log("onConnectedPeer");
-      setSelf({ ...self, isPolite: true });
-    },
+    onConnect,
+    onConnectedPeer,
   );
 
   useEffect(() => {
@@ -66,31 +73,23 @@ function App() {
       }
       setSelf((prevState) => ({ ...prevState, mediaStream: stream }));
     })();
-  }, []);
+  }, [self.mediaConstraints]);
 
   function registerRtcCallbacks(self: Self, peer: Peer) {
     peer.connection.onnegotiationneeded = async function () {
       self.isMakingOffer = true;
       console.log("Attempting to make an offer...");
       await peer.connection.setLocalDescription();
-      signal({
+      sendSignal({
         description: peer.connection.localDescription,
       });
       self.isMakingOffer = false;
     };
     peer.connection.onicecandidate = function ({ candidate }) {
       console.log("Attempting to handle an ICE candidate...");
-      signal({ candidate: candidate });
+      sendSignal({ candidate: candidate });
     };
     peer.connection.ontrack = function () {};
-  }
-
-  function addStreamingMedia(stream: MediaStream, peer: Peer) {
-    if (stream) {
-      for (const track of stream.getTracks()) {
-        peer.connection.addTrack(track);
-      }
-    }
   }
 
   function establishCallFeature(self: Self, peer: Peer) {
@@ -98,6 +97,14 @@ function App() {
 
     if (self.mediaStream) {
       addStreamingMedia(self.mediaStream, peer);
+    }
+  }
+
+  function addStreamingMedia(stream: MediaStream, peer: Peer) {
+    if (stream) {
+      for (const track of stream.getTracks()) {
+        peer.connection.addTrack(track);
+      }
     }
   }
 
