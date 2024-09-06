@@ -7,14 +7,13 @@ import useSignalingChannel from "@hooks/useSignalingChannel.ts";
 
 function App() {
   const namespace = useNamespace();
-
-  useSignalingChannel(namespace);
+  const { joinCall, leaveCall } = useSignalingChannel(namespace);
 
   return (
     <main className={styles.main}>
       <Header>
         <h1>Welcome to room #{namespace}</h1>
-        <JoinCallButton />
+        <JoinCallButton joinCall={joinCall} leaveCall={leaveCall} />
       </Header>
       <section>
         <h2 className={styles.preserveAccessibility}>Streaming Videos</h2>
