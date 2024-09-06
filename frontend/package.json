@@ -8,7 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint . && stylelint . --allow-empty-input && prettier . --check",
     "fix": "eslint . --fix && stylelint . --allow-empty-input --fix && prettier . --write",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.(ts|tsx|css|html|json|md)": [
+      "eslint --fix",
+      "stylelint --allow-empty-input --fix",
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "react": "^18.3.1",

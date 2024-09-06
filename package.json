@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky"
   },
   "workspaces": [
     "backend",
@@ -11,5 +12,8 @@
   ],
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "lint-staged": "^15.2.10"
+  }
 }
