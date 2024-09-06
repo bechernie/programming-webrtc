@@ -45,10 +45,14 @@ function App() {
     [self.rtcConfig],
   );
 
-  const onConnect = useCallback(() => {
-    console.log("onConnect");
-    establishCallFeature(self, peer);
-  }, [self, peer]);
+  const onConnect = useCallback(
+    () => {
+      console.log("onConnect");
+      establishCallFeature(self, peer);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [self, peer],
+  );
 
   const onConnectedPeer = useCallback(() => {
     console.log("onConnectedPeer");
