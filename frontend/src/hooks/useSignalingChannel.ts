@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-function useSignalingChannel(namespace: string) {
+function useSignalingChannel(
+  namespace: string,
+  onConnect: () => void,
+  onConnectedPeer: () => void,
+) {
   const [signalingChannel, setSignalingChannel] = useState<Socket>();
 
   useEffect(() => {
@@ -9,16 +13,11 @@ function useSignalingChannel(namespace: string) {
       autoConnect: false,
     });
 
-    socket.on("connect", function () {
-      console.log("connect");
-    });
-
-    socket.on("connected peer", function () {
-      console.log("connected peer");
-    });
+    socket.on("connect", onConnect);
+    socket.on("connected peer", onConnectedPeer);
 
     socket.on("disconnected peer", function () {
-      console.log("connected peer");
+      console.log("disconnected peer");
     });
 
     socket.on("signal", function () {
@@ -30,11 +29,13 @@ function useSignalingChannel(namespace: string) {
     });
 
     setSignalingChannel(socket);
-  }, [namespace]);
+  }, []);
 
   return {
     joinCall: () => signalingChannel?.connect(),
     leaveCall: () => signalingChannel?.disconnect(),
+    signal: (data: Record<string, unknown>) =>
+      signalingChannel?.emit("signal", data),
   };
 }
 
