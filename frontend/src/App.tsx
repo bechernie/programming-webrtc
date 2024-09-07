@@ -55,7 +55,8 @@ function App() {
   }
 
   function onDisconnectedPeer() {
-    console.log("onDisconnectedPeer");
+    resetPeer();
+    establishCallFeature();
   }
 
   async function onSignal(signal: RTCSignal) {
@@ -173,11 +174,25 @@ function App() {
     }
   }
 
+  function resetPeer() {
+    if (peerVideoElement.current) {
+      peerVideoElement.current.srcObject = null;
+    }
+    peer.current.connection.close();
+    peer.current.connection = new RTCPeerConnection(self.current.rtcConfig);
+  }
+
   return (
     <main className={styles.main}>
       <Header>
         <h1>Welcome to room {window.location.hash}</h1>
-        <JoinCallButton joinCall={joinCall} leaveCall={leaveCall} />
+        <JoinCallButton
+          joinCall={joinCall}
+          leaveCall={() => {
+            leaveCall();
+            resetPeer();
+          }}
+        />
       </Header>
       <section>
         <h2 className={styles.preserveAccessibility}>Streaming Videos</h2>
