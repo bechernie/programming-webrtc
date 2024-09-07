@@ -1,41 +1,65 @@
-import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { useEffect } from "react";
+import { prepareNamespace } from "@utils/prepareNamespace.ts";
+import { io } from "socket.io-client";
+
+const URL =
+  process.env.NODE_ENV === "production" ? undefined : "http://localhost:3000/";
+
+const namespace = prepareNamespace(window.location.hash, true);
+
+const socket = io(URL + namespace, {
+  autoConnect: false,
+});
+
+export interface RTCSessionDescriptionSignal {
+  type: "session";
+  description: RTCSessionDescription | null;
+}
+
+export interface RTCIceCandidateSignal {
+  type: "icecandidate";
+  candidate: RTCIceCandidate | null;
+}
+
+export type RTCSignal = RTCSessionDescriptionSignal | RTCIceCandidateSignal;
 
 function useSignalingChannel(
-  namespace: string,
-  onConnect: () => void,
-  onConnectedPeer: () => void,
+  onConnect: () => unknown,
+  onDisconnect: () => unknown,
+  onConnectedPeer: () => unknown,
+  onDisconnectedPeer: () => unknown,
+  onSignal: (signal: RTCSignal) => unknown,
 ) {
-  const [signalingChannel, setSignalingChannel] = useState<Socket>();
+  useEffect(
+    () => {
+      socket.on("connect", onConnect);
+      socket.on("connected peer", onConnectedPeer);
+      socket.on("disconnect", onDisconnect);
+      socket.on("disconnected peer", onDisconnectedPeer);
+      socket.on("signal", onSignal);
 
-  useEffect(() => {
-    const socket = io("http://localhost:3000/" + namespace, {
-      autoConnect: false,
-    });
-
-    socket.on("connect", onConnect);
-    socket.on("connected peer", onConnectedPeer);
-
-    socket.on("disconnected peer", function () {
-      console.log("disconnected peer");
-    });
-
-    socket.on("signal", function () {
-      console.log("signal");
-    });
-
-    socket.on("disconnect", function () {
-      console.log("disconnect");
-    });
-
-    setSignalingChannel(socket);
-  }, [namespace, onConnect, onConnectedPeer]);
+      return () => {
+        socket.off("connect", onConnect);
+        socket.off("connected peer", onConnectedPeer);
+        socket.off("disconnect", onDisconnect);
+        socket.off("disconnected peer", onDisconnectedPeer);
+        socket.off("signal", onSignal);
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   return {
-    joinCall: () => signalingChannel?.connect(),
-    leaveCall: () => signalingChannel?.disconnect(),
-    sendSignal: (data: Record<string, unknown>) =>
-      signalingChannel?.emit("signal", data),
+    joinCall: () => {
+      socket.connect();
+    },
+    leaveCall: () => {
+      socket.disconnect();
+    },
+    sendSignal: (signal: RTCSignal) => {
+      socket.emit("signal", signal);
+    },
   };
 }
 

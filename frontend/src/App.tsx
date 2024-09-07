@@ -2,9 +2,9 @@ import styles from "./App.module.css";
 import Header from "@components/Header/Header.tsx";
 import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import Video from "@components/Video/Video.tsx";
-import useNamespace from "@hooks/useNamespace.ts";
-import useSignalingChannel from "@hooks/useSignalingChannel.ts";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
 
 export interface Self {
   rtcConfig?: RTCConfiguration;
@@ -21,8 +21,6 @@ export interface Peer {
 }
 
 function App() {
-  const namespace = useNamespace();
-
   const [self, setSelf] = useState<Self>({
     rtcConfig: undefined,
     isPolite: false,
@@ -37,6 +35,7 @@ function App() {
   });
 
   const selfRef = useRef<HTMLVideoElement>(null);
+  const peerRef = useRef<HTMLVideoElement>(null);
 
   const peer: Peer = useMemo(
     () => ({
@@ -45,24 +44,86 @@ function App() {
     [self.rtcConfig],
   );
 
-  const onConnect = useCallback(
-    () => {
-      console.log("onConnect");
-      establishCallFeature(self, peer);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [self, peer],
-  );
+  function onConnect() {
+    console.log("onConnect");
+    establishCallFeature(self, peer);
+  }
 
-  const onConnectedPeer = useCallback(() => {
+  function onDisconnect() {
+    console.log("onDisconnect");
+  }
+
+  function onConnectedPeer() {
     console.log("onConnectedPeer");
     setSelf((prevState) => ({ ...prevState, isPolite: true }));
-  }, []);
+  }
+
+  function onDisconnectedPeer() {
+    console.log("onDisconnectedPeer");
+  }
+
+  async function onSignal(signal: RTCSignal) {
+    switch (signal.type) {
+      case "session": {
+        const readyForOffer =
+          !self.isMakingOffer &&
+          (peer.connection.signalingState === "stable" ||
+            self.isSettingRemoteAnswerPending);
+        const offerCollision =
+          signal.description?.type === "offer" && !readyForOffer;
+        const isIgnoringOffer = !self.isPolite && offerCollision;
+        setSelf((prevState) => {
+          return {
+            ...prevState,
+            isIgnoringOffer: isIgnoringOffer,
+          };
+        });
+        if (isIgnoringOffer) {
+          return;
+        }
+        setSelf((prevState) => ({
+          ...prevState,
+          isSettingRemoteAnswerPending: signal.description?.type === "answer",
+        }));
+        await peer.connection.setRemoteDescription(signal.description!);
+        setSelf((prevState) => ({
+          ...prevState,
+          isSettingRemoteAnswerPending: false,
+        }));
+        if (signal.description?.type === "offer") {
+          await peer.connection.setLocalDescription();
+          sendSignal({
+            type: "session",
+            description: peer.connection.localDescription,
+          });
+        }
+        break;
+      }
+      case "icecandidate": {
+        try {
+          await peer.connection.addIceCandidate(signal.candidate!);
+        } catch (e) {
+          if (
+            !self.isIgnoringOffer &&
+            signal.candidate?.candidate.length &&
+            signal.candidate?.candidate.length > 1
+          ) {
+            console.error("Unable to add ICE candidate for peer:", e);
+          }
+        }
+        break;
+      }
+      default:
+        exhaustiveSwitch(signal);
+    }
+  }
 
   const { joinCall, leaveCall, sendSignal } = useSignalingChannel(
-    namespace,
     onConnect,
+    onDisconnect,
     onConnectedPeer,
+    onDisconnectedPeer,
+    onSignal,
   );
 
   useEffect(() => {
@@ -81,19 +142,25 @@ function App() {
 
   function registerRtcCallbacks(self: Self, peer: Peer) {
     peer.connection.onnegotiationneeded = async function () {
-      self.isMakingOffer = true;
+      setSelf({ ...self, isMakingOffer: true });
       console.log("Attempting to make an offer...");
       await peer.connection.setLocalDescription();
       sendSignal({
+        type: "session",
         description: peer.connection.localDescription,
       });
-      self.isMakingOffer = false;
+      setSelf({ ...self, isMakingOffer: false });
     };
     peer.connection.onicecandidate = function ({ candidate }) {
       console.log("Attempting to handle an ICE candidate...");
-      sendSignal({ candidate: candidate });
+      sendSignal({ type: "icecandidate", candidate: candidate });
     };
-    peer.connection.ontrack = function () {};
+    peer.connection.ontrack = function ({ streams: [stream] }) {
+      console.log("Attempting to display media from peer...");
+      if (peerRef.current) {
+        peerRef.current.srcObject = stream;
+      }
+    };
   }
 
   function establishCallFeature(self: Self, peer: Peer) {
@@ -115,7 +182,7 @@ function App() {
   return (
     <main className={styles.main}>
       <Header>
-        <h1>Welcome to room #{namespace}</h1>
+        <h1>Welcome to room #{window.location.hash}</h1>
         <JoinCallButton joinCall={joinCall} leaveCall={leaveCall} />
       </Header>
       <section>
@@ -125,7 +192,7 @@ function App() {
           poster={"placeholder.png"}
           className={styles.self}
         />
-        <Video muted={false} poster={"placeholder.png"} />
+        <Video ref={peerRef} muted={false} poster={"placeholder.png"} />
       </section>
     </main>
   );
