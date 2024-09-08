@@ -14,6 +14,7 @@ export interface Self {
   isSettingRemoteAnswerPending: boolean;
   mediaConstraints: MediaStreamConstraints;
   mediaStream?: MediaStream;
+  messageQueue: string[];
 }
 
 export interface Peer {
@@ -64,6 +65,7 @@ function App() {
       audio: false,
     },
     mediaStream: undefined,
+    messageQueue: [],
   });
 
   const selfVideoElement = useRef<HTMLVideoElement>(null);
@@ -260,8 +262,30 @@ function App() {
   function handleMessageForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     appendMessage("self", message);
-    peer.current.chatChannel?.send(message);
+    sendOrQueueMessage(message);
     setMessage("");
+  }
+
+  function queueMessage(message: string, push = true) {
+    if (push) {
+      self.current.messageQueue.push(message);
+    } else {
+      self.current.messageQueue.unshift(message);
+    }
+  }
+
+  function sendOrQueueMessage(message: string, push = true) {
+    const chatChannel = peer.current.chatChannel;
+    if (!chatChannel || chatChannel.readyState !== "open") {
+      queueMessage(message, push);
+      return;
+    }
+    try {
+      peer.current.chatChannel?.send(message);
+    } catch (e) {
+      console.log("Error sending message:", e);
+      queueMessage(message, push);
+    }
   }
 
   useEffect(() => {
@@ -284,6 +308,18 @@ function App() {
     };
     peer.current.chatChannel.onclose = function () {
       console.log("Chat channel closed");
+    };
+    peer.current.chatChannel.onopen = function () {
+      console.log("Chat channel opened");
+      while (
+        self.current.messageQueue.length > 0 &&
+        peer.current.chatChannel?.readyState === "open"
+      ) {
+        const message = self.current.messageQueue.shift();
+        if (message) {
+          sendOrQueueMessage(message, false);
+        }
+      }
     };
   }
 
