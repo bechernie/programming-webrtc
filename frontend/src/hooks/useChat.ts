@@ -8,15 +8,15 @@ export interface Message {
   content: string;
 }
 
-function useChatChannel(self: Self, peer: Peer) {
+function useChat(self: Self, peer: Peer) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const chatLogRef = useRef<HTMLOListElement>(null);
+  const refMessagesList = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
-    chatLogRef.current?.scrollTo({
-      top: chatLogRef.current?.scrollHeight,
+    refMessagesList.current?.scrollTo({
+      top: refMessagesList.current?.scrollHeight,
       behavior: "smooth",
     });
   }, [messages]);
@@ -86,12 +86,12 @@ function useChatChannel(self: Self, peer: Peer) {
 
   return {
     message,
-    handleChangeMessage: setMessage,
+    setMessage,
     messages,
     addChatChannel,
     sendMessage,
-    chatLogRef,
+    refMessagesList,
   };
 }
 
-export default useChatChannel;
+export default useChat;

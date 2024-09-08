@@ -1,0 +1,12 @@
+video.self {
+  width: 30%;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  border: 1px solid #ccc;
+}
+
+.connected {
+  cursor: pointer;
+}

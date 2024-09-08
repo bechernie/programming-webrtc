@@ -1,0 +1,30 @@
+.main {
+  height: 100vh;
+  padding: 1.5rem;
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-rows: auto auto 1fr;
+}
+
+.videos {
+  position: relative;
+}
+
+video {
+  background-color: #ddd;
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media screen and (width >= 680px) {
+  .main {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .header {
+    grid-column: 1/3;
+  }
+}

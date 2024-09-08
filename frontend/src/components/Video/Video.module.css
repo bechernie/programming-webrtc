@@ -3,3 +3,23 @@
   display: block;
   max-width: 100%;
 }
+
+.filter-none {
+  filter: none;
+}
+
+.filter-grayscale {
+  filter: grayscale(100%);
+}
+
+.filter-sepia {
+  filter: sepia(100%);
+}
+
+.filter-noir {
+  filter: grayscale(100%) contrast(300%) brightness(60%);
+}
+
+.filter-psychedelic {
+  filter: hue-rotate(180deg) saturate(400%) contrast(200%);
+}

@@ -1,32 +1,21 @@
-import { FormEvent, RefObject } from "react";
+import { FormEvent } from "react";
 import styles from "./Chat.module.css";
 import globals from "@src/Globals.module.css";
-import { Message } from "@hooks/useChatChannel.ts";
+import { useChatContext } from "@components/Chat/ChatContext.tsx";
 
-export interface ChatProps {
-  message: string;
-  handleChangeMessage: (message: string) => void;
-  messages: Message[];
-  handleSendMessage: () => void;
-  chatLogRef: RefObject<HTMLOListElement>;
-}
+function Chat() {
+  const { message, setMessage, messages, sendMessage, refMessagesList } =
+    useChatContext();
 
-function Chat({
-  message,
-  handleChangeMessage,
-  messages,
-  handleSendMessage,
-  chatLogRef,
-}: ChatProps) {
   function handleMessageForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    handleSendMessage();
+    sendMessage();
   }
 
   return (
     <aside className={styles.chat}>
       <h2 className={globals.preserveAccessibility}>Text Chat</h2>
-      <ol ref={chatLogRef} className={styles.chatLog}>
+      <ol ref={refMessagesList} className={styles.chatLog}>
         {messages.map((message, index) => (
           <li
             key={index}
@@ -53,7 +42,7 @@ function Chat({
           name={"chat-message"}
           autoComplete={"off"}
           value={message}
-          onChange={(event) => handleChangeMessage(event.target.value)}
+          onChange={(event) => setMessage(event.target.value)}
         />
         <button type={"submit"} id={"chat-button"}>
           Send
