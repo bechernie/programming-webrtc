@@ -62,12 +62,13 @@ function App() {
   async function onSignal(signal: RTCSignal) {
     switch (signal.type) {
       case "session": {
+        const description = signal.description;
+
         const readyForOffer =
           !self.current.isMakingOffer &&
           (peer.current.connection.signalingState === "stable" ||
             self.current.isSettingRemoteAnswerPending);
-        const offerCollision =
-          signal.description?.type === "offer" && !readyForOffer;
+        const offerCollision = description?.type === "offer" && !readyForOffer;
         self.current.isIgnoringOffer = !self.current.isPolite && offerCollision;
 
         if (self.current.isIgnoringOffer) {
@@ -75,15 +76,13 @@ function App() {
         }
 
         self.current.isSettingRemoteAnswerPending =
-          signal.description?.type === "answer";
-        if (signal.description) {
-          await peer.current.connection.setRemoteDescription(
-            signal.description,
-          );
+          description?.type === "answer";
+        if (description) {
+          await peer.current.connection.setRemoteDescription(description);
         }
         self.current.isSettingRemoteAnswerPending = false;
 
-        if (signal.description?.type === "offer") {
+        if (description?.type === "offer") {
           await peer.current.connection.setLocalDescription();
           sendSignal({
             type: "session",
@@ -93,15 +92,17 @@ function App() {
         break;
       }
       case "icecandidate": {
+        const candidate = signal.candidate;
+
         try {
-          if (signal.candidate) {
-            await peer.current.connection.addIceCandidate(signal.candidate);
+          if (candidate) {
+            await peer.current.connection.addIceCandidate(candidate);
           }
         } catch (e) {
           if (
             !self.current.isIgnoringOffer &&
-            signal.candidate?.candidate.length &&
-            signal.candidate?.candidate.length > 1
+            candidate?.candidate.length &&
+            candidate?.candidate.length > 1
           ) {
             console.error("Unable to add ICE candidate for peer:", e);
           }
