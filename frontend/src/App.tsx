@@ -237,7 +237,7 @@ function App() {
 
   return (
     <main className={styles.main}>
-      <Header>
+      <Header className={styles.header}>
         <h1>Welcome to room {window.location.hash}</h1>
         <JoinCallButton
           joinCall={joinCall}
@@ -247,7 +247,7 @@ function App() {
           }}
         />
       </Header>
-      <section>
+      <section className={styles.videos}>
         <h2 className={styles.preserveAccessibility}>Streaming Videos</h2>
         <Video
           ref={selfVideoElement}
@@ -268,6 +268,27 @@ function App() {
           className={styles[peerFilter]}
         />
       </section>
+      <aside className={styles.chat}>
+        <h2 className={styles.preserveAccessibility}>Text Chat</h2>
+        <ol className={styles.chatLog} />
+        <form className={styles.chatForm} action={"#null"}>
+          <label
+            htmlFor={"chat-message"}
+            className={styles.preserveAccessibility}
+          >
+            Compose Message
+          </label>
+          <input
+            type={"text"}
+            id={"chat-message"}
+            name={"chat-message"}
+            autoComplete={"off"}
+          />
+          <button type={"submit"} id={"chat-button"}>
+            Send
+          </button>
+        </form>
+      </aside>
     </main>
   );
 }
