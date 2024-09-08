@@ -12,3 +12,27 @@ video.self {
   max-width: 320px;
   margin-bottom: 0.75rem;
 }
+
+video.filter-none {
+  filter: none;
+}
+
+video.filter-grayscale {
+  filter: grayscale(100%);
+}
+
+video.filter-sepia {
+  filter: sepia(100%);
+}
+
+video.filter-noir {
+  filter: grayscale(100%) contrast(300%) brightness(60%);
+}
+
+video.filter-psychedelic {
+  filter: hue-rotate(180deg) saturate(400%) contrast(200%);
+}
+
+.connected {
+  cursor: pointer;
+}

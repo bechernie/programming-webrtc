@@ -3,7 +3,7 @@ import Header from "@components/Header/Header.tsx";
 import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import Video from "@components/Video/Video.tsx";
 import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
 
 export interface Self {
@@ -21,6 +21,37 @@ export interface Peer {
 }
 
 function App() {
+  const filters = [
+    "filter-none",
+    "filter-grayscale",
+    "filter-sepia",
+    "filter-noir",
+    "filter-psychedelic",
+  ];
+  const [filterIndex, setFilterIndex] = useState(0);
+
+  function onSelfVideoClick() {
+    if (peer.current.connection.connectionState !== "connected") {
+      return;
+    }
+    setFilterIndex((prevState) => (prevState + 1) % filters.length);
+  }
+
+  const selfFilter = filters[filterIndex];
+
+  const [peerFilter, setPeerFilter] = useState("filter-none");
+
+  useEffect(() => {
+    if (peer.current.connection.connectionState !== "connected") {
+      return;
+    }
+    const filterDataChannel =
+      peer.current.connection.createDataChannel(selfFilter);
+    filterDataChannel.onclose = function () {
+      console.log(`Remote peer has closed the ${selfFilter}`);
+    };
+  }, [selfFilter]);
+
   const self = useRef<Self>({
     rtcConfig: undefined,
     isPolite: false,
@@ -35,6 +66,9 @@ function App() {
   });
 
   const selfVideoElement = useRef<HTMLVideoElement>(null);
+
+  const [connectionState, setConnectionState] =
+    useState<RTCPeerConnectionState>();
 
   const peer = useRef<Peer>({
     connection: new RTCPeerConnection(self.current.rtcConfig),
@@ -137,6 +171,24 @@ function App() {
   }, []);
 
   function registerRtcCallbacks() {
+    peer.current.connection.onconnectionstatechange = function () {
+      const connectionState = peer.current.connection.connectionState;
+      console.log(`Connection state is now: ${connectionState}`);
+      setConnectionState(connectionState);
+    };
+    peer.current.connection.ondatachannel = function ({ channel }) {
+      const label = channel.label;
+      if (label.startsWith("filter-")) {
+        setPeerFilter(label);
+        channel.onopen = function () {
+          channel.close();
+        };
+      } else {
+        console.log(
+          `Opened ${channel.label} channel with an ID of ${channel.id}`,
+        );
+      }
+    };
     peer.current.connection.onnegotiationneeded = async function () {
       self.current.isMakingOffer = true;
       console.log("Attempting to make an offer...");
@@ -200,12 +252,20 @@ function App() {
         <Video
           ref={selfVideoElement}
           poster={"placeholder.png"}
-          className={styles.self}
+          className={[
+            styles.self,
+            styles[selfFilter],
+            connectionState === "connected" && styles.connected,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          onClick={onSelfVideoClick}
         />
         <Video
           ref={peerVideoElement}
           muted={false}
           poster={"placeholder.png"}
+          className={styles[peerFilter]}
         />
       </section>
     </main>
