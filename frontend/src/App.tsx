@@ -18,6 +18,7 @@ export interface Self {
 
 export interface Peer {
   connection: RTCPeerConnection;
+  chatChannel?: RTCDataChannel;
 }
 
 function App() {
@@ -213,6 +214,7 @@ function App() {
 
   function establishCallFeature() {
     registerRtcCallbacks();
+    addChatChannel();
 
     if (self.current.mediaStream) {
       addStreamingMedia(self.current.mediaStream);
@@ -258,6 +260,7 @@ function App() {
   function handleMessageForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     appendMessage("self", message);
+    peer.current.chatChannel?.send(message);
     setMessage("");
   }
 
@@ -267,6 +270,22 @@ function App() {
       behavior: "smooth",
     });
   }, [messages]);
+
+  function addChatChannel() {
+    peer.current.chatChannel = peer.current.connection.createDataChannel(
+      "text-chat",
+      {
+        negotiated: true,
+        id: 100,
+      },
+    );
+    peer.current.chatChannel.onmessage = function (event) {
+      appendMessage("peer", event.data);
+    };
+    peer.current.chatChannel.onclose = function () {
+      console.log("Chat channel closed");
+    };
+  }
 
   return (
     <main className={styles.main}>
