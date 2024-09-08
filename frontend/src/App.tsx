@@ -1,26 +1,14 @@
-import styles from "./App.module.css";
+import styles from "@src/App.module.css";
+import globals from "@src/Globals.module.css";
 import Header from "@components/Header/Header.tsx";
 import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import Video from "@components/Video/Video.tsx";
 import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
-
-export interface Self {
-  rtcConfig?: RTCConfiguration;
-  isPolite: boolean;
-  isMakingOffer: boolean;
-  isIgnoringOffer: boolean;
-  isSettingRemoteAnswerPending: boolean;
-  mediaConstraints: MediaStreamConstraints;
-  mediaStream?: MediaStream;
-  messageQueue: string[];
-}
-
-export interface Peer {
-  connection: RTCPeerConnection;
-  chatChannel?: RTCDataChannel;
-}
+import Chat from "@components/Chat/Chat.tsx";
+import useChatChannel from "@hooks/useChatChannel.ts";
+import { Peer, Self } from "@utils/types.ts";
 
 function App() {
   const filters = [
@@ -239,89 +227,14 @@ function App() {
     peer.current.connection = new RTCPeerConnection(self.current.rtcConfig);
   }
 
-  interface Message {
-    sender: "self" | "peer";
-    content: string;
-  }
-
-  const chatLogRef = useRef<HTMLOListElement>(null);
-
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-
-  function appendMessage(sender: "self" | "peer", message: string) {
-    setMessages((prevState) => [
-      ...prevState,
-      {
-        sender: sender,
-        content: message,
-      },
-    ]);
-  }
-
-  function handleMessageForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    appendMessage("self", message);
-    sendOrQueueMessage(message);
-    setMessage("");
-  }
-
-  function queueMessage(message: string, push = true) {
-    if (push) {
-      self.current.messageQueue.push(message);
-    } else {
-      self.current.messageQueue.unshift(message);
-    }
-  }
-
-  function sendOrQueueMessage(message: string, push = true) {
-    const chatChannel = peer.current.chatChannel;
-    if (!chatChannel || chatChannel.readyState !== "open") {
-      queueMessage(message, push);
-      return;
-    }
-    try {
-      peer.current.chatChannel?.send(message);
-    } catch (e) {
-      console.log("Error sending message:", e);
-      queueMessage(message, push);
-    }
-  }
-
-  useEffect(() => {
-    chatLogRef.current?.scrollTo({
-      top: chatLogRef.current?.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);
-
-  function addChatChannel() {
-    peer.current.chatChannel = peer.current.connection.createDataChannel(
-      "text-chat",
-      {
-        negotiated: true,
-        id: 100,
-      },
-    );
-    peer.current.chatChannel.onmessage = function (event) {
-      appendMessage("peer", event.data);
-    };
-    peer.current.chatChannel.onclose = function () {
-      console.log("Chat channel closed");
-    };
-    peer.current.chatChannel.onopen = function () {
-      console.log("Chat channel opened");
-      while (
-        self.current.messageQueue.length > 0 &&
-        peer.current.chatChannel?.readyState === "open"
-      ) {
-        const message = self.current.messageQueue.shift();
-        if (message) {
-          sendOrQueueMessage(message, false);
-        }
-      }
-    };
-  }
+  const {
+    message,
+    handleChangeMessage,
+    messages,
+    sendMessage,
+    addChatChannel,
+    chatLogRef,
+  } = useChatChannel(self.current, peer.current);
 
   return (
     <main className={styles.main}>
@@ -336,7 +249,7 @@ function App() {
         />
       </Header>
       <section className={styles.videos}>
-        <h2 className={styles.preserveAccessibility}>Streaming Videos</h2>
+        <h2 className={globals.preserveAccessibility}>Streaming Videos</h2>
         <Video
           ref={selfVideoElement}
           poster={"placeholder.png"}
@@ -356,42 +269,13 @@ function App() {
           className={styles[peerFilter]}
         />
       </section>
-      <aside className={styles.chat}>
-        <h2 className={styles.preserveAccessibility}>Text Chat</h2>
-        <ol ref={chatLogRef} className={styles.chatLog}>
-          {messages.map((message, index) => (
-            <li
-              key={index}
-              className={message.sender === "self" ? styles.self : styles.peer}
-            >
-              {message.content}
-            </li>
-          ))}
-        </ol>
-        <form
-          className={styles.chatForm}
-          action={"#null"}
-          onSubmit={handleMessageForm}
-        >
-          <label
-            htmlFor={"chat-message"}
-            className={styles.preserveAccessibility}
-          >
-            Compose Message
-          </label>
-          <input
-            type={"text"}
-            id={"chat-message"}
-            name={"chat-message"}
-            autoComplete={"off"}
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-          />
-          <button type={"submit"} id={"chat-button"}>
-            Send
-          </button>
-        </form>
-      </aside>
+      <Chat
+        message={message}
+        handleChangeMessage={handleChangeMessage}
+        messages={messages}
+        handleSendMessage={sendMessage}
+        chatLogRef={chatLogRef}
+      />
     </main>
   );
 }
