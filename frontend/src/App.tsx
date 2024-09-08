@@ -3,7 +3,7 @@ import Header from "@components/Header/Header.tsx";
 import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import Video from "@components/Video/Video.tsx";
 import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
-import { useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
 
 export interface Self {
@@ -235,6 +235,39 @@ function App() {
     peer.current.connection = new RTCPeerConnection(self.current.rtcConfig);
   }
 
+  interface Message {
+    sender: "self" | "peer";
+    content: string;
+  }
+
+  const chatLogRef = useRef<HTMLOListElement>(null);
+
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  function appendMessage(sender: "self" | "peer", message: string) {
+    setMessages((prevState) => [
+      ...prevState,
+      {
+        sender: sender,
+        content: message,
+      },
+    ]);
+  }
+
+  function handleMessageForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    appendMessage("self", message);
+    setMessage("");
+  }
+
+  useEffect(() => {
+    chatLogRef.current?.scrollTo({
+      top: chatLogRef.current?.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
+
   return (
     <main className={styles.main}>
       <Header className={styles.header}>
@@ -270,8 +303,21 @@ function App() {
       </section>
       <aside className={styles.chat}>
         <h2 className={styles.preserveAccessibility}>Text Chat</h2>
-        <ol className={styles.chatLog} />
-        <form className={styles.chatForm} action={"#null"}>
+        <ol ref={chatLogRef} className={styles.chatLog}>
+          {messages.map((message, index) => (
+            <li
+              key={index}
+              className={message.sender === "self" ? styles.self : styles.peer}
+            >
+              {message.content}
+            </li>
+          ))}
+        </ol>
+        <form
+          className={styles.chatForm}
+          action={"#null"}
+          onSubmit={handleMessageForm}
+        >
           <label
             htmlFor={"chat-message"}
             className={styles.preserveAccessibility}
@@ -283,6 +329,8 @@ function App() {
             id={"chat-message"}
             name={"chat-message"}
             autoComplete={"off"}
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
           />
           <button type={"submit"} id={"chat-button"}>
             Send
