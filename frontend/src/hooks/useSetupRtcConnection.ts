@@ -30,7 +30,7 @@ function useSetupRtcConnection(
   }: RtcCallbacks,
   onEstablishCall: () => void,
 ) {
-  const { self, peer } = usePeerToPeerContext();
+  const { self, peer, resetPeerFeatures } = usePeerToPeerContext();
 
   function onConnect() {
     establishCallFeature();
@@ -122,17 +122,12 @@ function useSetupRtcConnection(
   function establishCallFeature() {
     registerRtcCallbacks();
     onEstablishCall();
-
-    if (self.mediaStream) {
-      addStreamingMedia(self.mediaStream);
-    }
+    addStreamingMedia();
   }
 
-  function addStreamingMedia(stream: MediaStream) {
-    if (stream) {
-      for (const track of stream.getTracks()) {
-        peer.connection.addTrack(track, stream);
-      }
+  function addStreamingMedia() {
+    for (const track of Object.values(self.mediaTracks)) {
+      peer.connection.addTrack(track, self.mediaStream);
     }
   }
 
@@ -140,6 +135,7 @@ function useSetupRtcConnection(
     displayStream(peer.refHtmlVideoElement.current, null);
     peer.connection.close();
     peer.connection = new RTCPeerConnection(self.rtcConfig);
+    resetPeerFeatures();
   }
 
   return {

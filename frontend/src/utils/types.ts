@@ -1,6 +1,13 @@
 import { RefObject } from "react";
 import { MessageContent, MessageResponse } from "@hooks/useChat.ts";
 
+export interface MediaTracks {
+  audio?: MediaStreamTrack;
+  video?: MediaStreamTrack;
+}
+
+export const DEFAULT_MEDIA_TRACKS: MediaTracks = {};
+
 export interface Self {
   rtcConfig?: RTCConfiguration;
   isPolite: boolean;
@@ -8,7 +15,8 @@ export interface Self {
   isIgnoringOffer: boolean;
   isSettingRemoteAnswerPending: boolean;
   mediaConstraints: MediaStreamConstraints;
-  mediaStream?: MediaStream;
+  mediaTracks: MediaTracks;
+  mediaStream: MediaStream;
   messageQueue: (MessageContent | MessageResponse)[];
   refHtmlVideoElement: RefObject<HTMLVideoElement>;
 }

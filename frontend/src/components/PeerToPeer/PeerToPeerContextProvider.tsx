@@ -1,6 +1,10 @@
-import { Peer, Self } from "@utils/types.ts";
-import { ReactNode, useEffect, useRef } from "react";
-import { PeerToPeerContext } from "./PeerToPeerContext";
+import { DEFAULT_MEDIA_TRACKS, Peer, Self } from "@utils/types.ts";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import {
+  DEFAULT_PEER_TO_PEER_FEATURES,
+  PeerToPeerContext,
+  PeerToPeerFeatures,
+} from "./PeerToPeerContext";
 import displayStream from "@utils/displayStream.ts";
 
 function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
@@ -14,9 +18,10 @@ function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
     isSettingRemoteAnswerPending: false,
     mediaConstraints: {
       video: true,
-      audio: false,
+      audio: true,
     },
-    mediaStream: undefined,
+    mediaTracks: DEFAULT_MEDIA_TRACKS,
+    mediaStream: new MediaStream(),
     messageQueue: [],
     refHtmlVideoElement: selfVideoElement,
   });
@@ -28,15 +33,32 @@ function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
     refHtmlVideoElement: peerVideoElement,
   });
 
+  const [selfFeatures, setSelfFeatures] = useState<PeerToPeerFeatures>(
+    DEFAULT_PEER_TO_PEER_FEATURES,
+  );
+  const [peerFeatures, setPeerFeatures] = useState<PeerToPeerFeatures>(
+    DEFAULT_PEER_TO_PEER_FEATURES,
+  );
+
   useEffect(() => {
     (async function () {
-      const stream = new MediaStream();
       const media = await navigator.mediaDevices.getUserMedia(
         self.current.mediaConstraints,
       );
-      stream.addTrack(media.getTracks()[0]);
-      displayStream(self.current.refHtmlVideoElement.current, stream);
-      self.current.mediaStream = stream;
+
+      self.current.mediaTracks.audio = media.getAudioTracks()[0];
+      self.current.mediaTracks.video = media.getVideoTracks()[0];
+
+      self.current.mediaTracks.audio.enabled = selfFeatures.audio;
+      self.current.mediaTracks.video.enabled = selfFeatures.video;
+
+      self.current.mediaStream.addTrack(self.current.mediaTracks.audio);
+      self.current.mediaStream.addTrack(self.current.mediaTracks.video);
+
+      displayStream(
+        self.current.refHtmlVideoElement.current,
+        self.current.mediaStream,
+      );
     })();
   }, []);
 
@@ -44,7 +66,19 @@ function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
     <PeerToPeerContext.Provider
       value={{
         self: self.current,
+        selfFeatures,
+        enableSelfAudioFeature: (enable: boolean) =>
+          setSelfFeatures((prevState) => ({ ...prevState, audio: enable })),
+        enableSelfVideoFeature: (enable: boolean) =>
+          setSelfFeatures((prevState) => ({ ...prevState, video: enable })),
+        resetSelfFeatures: () => setSelfFeatures(DEFAULT_PEER_TO_PEER_FEATURES),
         peer: peer.current,
+        peerFeatures,
+        enablePeerAudioFeature: (enable: boolean) =>
+          setPeerFeatures((prevState) => ({ ...prevState, audio: enable })),
+        enablePeerVideoFeature: (enable: boolean) =>
+          setPeerFeatures((prevState) => ({ ...prevState, video: enable })),
+        resetPeerFeatures: () => setSelfFeatures(DEFAULT_PEER_TO_PEER_FEATURES),
       }}
     >
       {children}
