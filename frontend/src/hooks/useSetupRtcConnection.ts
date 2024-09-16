@@ -1,6 +1,6 @@
 import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
-import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.tsx";
+import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 
 export interface RtcCallbacks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

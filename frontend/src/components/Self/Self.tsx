@@ -3,7 +3,7 @@ import styles from "./Self.module.css";
 import videoStyles from "@src/components/Video/Video.module.css";
 import useFilter from "@hooks/useFilter.ts";
 import { useEffect } from "react";
-import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.tsx";
+import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 
 export interface SelfProps {
   connectionState?: RTCPeerConnectionState;

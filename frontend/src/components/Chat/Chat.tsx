@@ -1,7 +1,7 @@
 import { FormEvent } from "react";
 import styles from "./Chat.module.css";
 import globals from "@src/Globals.module.css";
-import { useChatContext } from "@components/Chat/ChatContext.tsx";
+import { useChatContext } from "@components/Chat/ChatContext.ts";
 
 function Chat() {
   const { message, setMessage, messages, sendMessage, refMessagesList } =

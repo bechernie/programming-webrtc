@@ -4,12 +4,12 @@ import JoinCallButton from "@components/JoinCallButton/JoinCallButton.tsx";
 import globals from "@src/Globals.module.css";
 import Chat from "@components/Chat/Chat.tsx";
 import { useState } from "react";
-import { useChatContext } from "@components/Chat/ChatContext.tsx";
 import Self from "@components/Self/Self.tsx";
 import Peer from "@components/Peer/Peer.tsx";
 import usePeerToPeerCall from "@hooks/useSetupRtcConnection.ts";
 import { RTCSignal } from "@hooks/useSignalingChannel.ts";
-import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.tsx";
+import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
+import { useChatContext } from "@components/Chat/ChatContext.ts";
 
 function Layout() {
   const { self, peer } = usePeerToPeerContext();

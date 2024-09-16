@@ -1,6 +1,6 @@
 import Video from "@components/Video/Video.tsx";
 import videoStyles from "@components/Video/Video.module.css";
-import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.tsx";
+import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 
 export interface PeerProps {
   filter: string;

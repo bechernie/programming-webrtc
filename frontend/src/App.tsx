@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
 import Layout from "@components/Layout/Layout.tsx";
-import ChatContextProvider from "@components/Chat/ChatContext.tsx";
-import PeerToPeerContextProvider, {
-  usePeerToPeerContext,
-} from "@components/PeerToPeer/PeerToPeerContext.tsx";
+import ChatContextProvider from "@components/Chat/ChatContextProvider.tsx";
+import PeerToPeerContextProvider from "@components/PeerToPeer/PeerToPeerContextProvider.tsx";
+import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 
 function ChatContextProviderPeerToPeerWrapper({
   children,

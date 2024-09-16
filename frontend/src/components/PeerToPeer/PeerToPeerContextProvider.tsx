@@ -1,18 +1,6 @@
 import { Peer, Self } from "@utils/types.ts";
-import { createContext, ReactNode, useContext, useEffect, useRef } from "react";
-
-export interface PeerToPeerContext {
-  self: Self;
-  peer: Peer;
-}
-
-const PeerToPeerContext = createContext<PeerToPeerContext>(
-  {} as PeerToPeerContext,
-);
-
-export function usePeerToPeerContext() {
-  return useContext(PeerToPeerContext);
-}
+import { ReactNode, useEffect, useRef } from "react";
+import { PeerToPeerContext } from "./PeerToPeerContext";
 
 function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
   const selfVideoElement = useRef<HTMLVideoElement>(null);

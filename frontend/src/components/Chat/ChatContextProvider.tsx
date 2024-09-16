@@ -1,21 +1,7 @@
-import { createContext, ReactNode, RefObject, useContext } from "react";
-import useChat, { Message } from "@hooks/useChat.ts";
+import { ReactNode } from "react";
+import useChat from "@hooks/useChat.ts";
 import { Peer, Self } from "@utils/types.ts";
-
-export interface ChatContext {
-  message: string;
-  setMessage: (message: string) => void;
-  messages: Message[];
-  addChatChannel: () => void;
-  sendMessage: () => void;
-  refMessagesList: RefObject<HTMLOListElement>;
-}
-
-const ChatContext = createContext<ChatContext>({} as ChatContext);
-
-export function useChatContext() {
-  return useContext(ChatContext);
-}
+import { ChatContext } from "./ChatContext";
 
 export interface ChatContextProviderProps {
   self: Self;
