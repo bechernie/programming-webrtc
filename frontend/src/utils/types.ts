@@ -1,4 +1,5 @@
 import { RefObject } from "react";
+import { MessageContent, MessageResponse } from "@hooks/useChat.ts";
 
 export interface Self {
   rtcConfig?: RTCConfiguration;
@@ -8,7 +9,7 @@ export interface Self {
   isSettingRemoteAnswerPending: boolean;
   mediaConstraints: MediaStreamConstraints;
   mediaStream?: MediaStream;
-  messageQueue: string[];
+  messageQueue: (MessageContent | MessageResponse)[];
   refHtmlVideoElement: RefObject<HTMLVideoElement>;
 }
 

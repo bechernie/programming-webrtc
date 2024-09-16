@@ -16,14 +16,21 @@ function Chat() {
     <aside className={styles.chat}>
       <h2 className={globals.preserveAccessibility}>Text Chat</h2>
       <ol ref={refMessagesList} className={styles.chatLog}>
-        {messages.map((message, index) => (
-          <li
-            key={index}
-            className={message.sender === "self" ? styles.self : styles.peer}
-          >
-            {message.content}
-          </li>
-        ))}
+        {messages.map((message, index) => {
+          const classes = [
+            message.sender === "self" ? styles.self : styles.peer,
+            message.acknowledged ? styles.received : "",
+            message.delayed ? styles.delayed : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return (
+            <li key={index} className={classes}>
+              {message.content.text}
+            </li>
+          );
+        })}
       </ol>
       <form
         className={styles.chatForm}

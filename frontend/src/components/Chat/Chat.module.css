@@ -37,7 +37,16 @@
 .chatLog .self {
   background: #099;
   color: #eee;
+  opacity: 0.3;
   float: right;
+}
+
+.chatLog .received {
+  opacity: 1;
+}
+
+.chatLog .delayed {
+  transition: opacity 0.4s;
 }
 
 .chatForm button {
