@@ -1,6 +1,7 @@
 import { Peer, Self } from "@utils/types.ts";
 import { ReactNode, useEffect, useRef } from "react";
 import { PeerToPeerContext } from "./PeerToPeerContext";
+import displayStream from "@utils/displayStream.ts";
 
 function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
   const selfVideoElement = useRef<HTMLVideoElement>(null);
@@ -34,9 +35,7 @@ function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
         self.current.mediaConstraints,
       );
       stream.addTrack(media.getTracks()[0]);
-      if (self.current.refHtmlVideoElement.current) {
-        self.current.refHtmlVideoElement.current.srcObject = stream;
-      }
+      displayStream(self.current.refHtmlVideoElement.current, stream);
       self.current.mediaStream = stream;
     })();
   }, []);

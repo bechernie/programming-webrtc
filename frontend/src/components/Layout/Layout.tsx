@@ -10,6 +10,7 @@ import usePeerToPeerCall from "@hooks/useSetupRtcConnection.ts";
 import { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 import { useChatContext } from "@components/Chat/ChatContext.ts";
+import displayStream from "@utils/displayStream.ts";
 
 function Layout() {
   const { self, peer } = usePeerToPeerContext();
@@ -67,9 +68,7 @@ function Layout() {
 
   function ontrack({ streams: [stream] }: RTCTrackEvent) {
     console.log("Attempting to display media from peer...");
-    if (peer.refHtmlVideoElement.current) {
-      peer.refHtmlVideoElement.current.srcObject = stream;
-    }
+    displayStream(peer.refHtmlVideoElement.current, stream);
   }
 
   const { addChatChannel } = useChatContext();

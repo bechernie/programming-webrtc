@@ -1,6 +1,7 @@
 import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
+import displayStream from "@utils/displayStream.ts";
 
 export interface RtcCallbacks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,9 +137,7 @@ function useSetupRtcConnection(
   }
 
   function resetPeer() {
-    if (peer.refHtmlVideoElement.current) {
-      peer.refHtmlVideoElement.current.srcObject = null;
-    }
+    displayStream(peer.refHtmlVideoElement.current, null);
     peer.connection.close();
     peer.connection = new RTCPeerConnection(self.rtcConfig);
   }
