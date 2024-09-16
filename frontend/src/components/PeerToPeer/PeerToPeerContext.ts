@@ -9,13 +9,11 @@ export interface PeerToPeerFeatures {
 export interface PeerToPeerContext {
   self: Self;
   selfFeatures: PeerToPeerFeatures;
-  enableSelfAudioFeature: (enable: boolean) => void;
-  enableSelfVideoFeature: (enable: boolean) => void;
+  toggleSelfAudioFeature: () => void;
+  toggleSelfVideoFeature: () => void;
   resetSelfFeatures: () => void;
   peer: Peer;
   peerFeatures: PeerToPeerFeatures;
-  enablePeerAudioFeature: (enable: boolean) => void;
-  enablePeerVideoFeature: (enable: boolean) => void;
   resetPeerFeatures: () => void;
 }
 

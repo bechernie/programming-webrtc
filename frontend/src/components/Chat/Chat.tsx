@@ -3,7 +3,7 @@ import styles from "./Chat.module.css";
 import globals from "@src/Globals.module.css";
 import { useChatContext } from "@components/Chat/ChatContext.ts";
 
-function Chat() {
+function Chat({ className }: { className?: string }) {
   const { message, setMessage, messages, sendMessage, refMessagesList } =
     useChatContext();
 
@@ -13,7 +13,7 @@ function Chat() {
   }
 
   return (
-    <aside className={styles.chat}>
+    <aside className={[styles.chat, className].filter(Boolean).join(" ")}>
       <h2 className={globals.preserveAccessibility}>Text Chat</h2>
       <ol ref={refMessagesList} className={styles.chatLog}>
         {messages.map((message, index) => {
