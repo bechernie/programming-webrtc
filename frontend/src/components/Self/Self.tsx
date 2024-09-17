@@ -6,15 +6,15 @@ import { useEffect } from "react";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 
 export interface SelfProps {
-  connectionState?: RTCPeerConnectionState;
+  status: "connected" | "disconnected";
 }
 
-function Self({ connectionState }: SelfProps) {
+function Self({ status }: SelfProps) {
   const { self, peer } = usePeerToPeerContext();
   const { filter: selfFilter, cycleFilter } = useFilter();
 
   function onSelfVideoClick() {
-    if (connectionState !== "connected") {
+    if (status !== "connected") {
       return;
     }
 
@@ -23,7 +23,7 @@ function Self({ connectionState }: SelfProps) {
 
   useEffect(
     () => {
-      if (connectionState !== "connected") {
+      if (status !== "connected") {
         return;
       }
       const filterDataChannel = peer.connection.createDataChannel(selfFilter);
@@ -42,7 +42,7 @@ function Self({ connectionState }: SelfProps) {
       className={[
         styles.self,
         videoStyles[selfFilter],
-        connectionState === "connected" && styles.connected,
+        status === "connected" && styles.connected,
       ]
         .filter(Boolean)
         .join(" ")}

@@ -22,7 +22,7 @@ function useFeatures(self: Self, peer: Peer) {
     });
     peer.featuresChannel.onopen = function () {
       console.log("Features channel opened");
-      peer.featuresChannel?.send(JSON.stringify(selfFeatures));
+      shareFeatures(selfFeatures);
     };
     peer.featuresChannel.onmessage = function (event) {
       const features = JSON.parse(event.data) as PeerToPeerFeatures;
@@ -33,6 +33,10 @@ function useFeatures(self: Self, peer: Peer) {
     };
   }
 
+  function shareFeatures(features: PeerToPeerFeatures) {
+    peer.featuresChannel?.send(JSON.stringify(features));
+  }
+
   return {
     selfFeatures,
     toggleSelfAudioFeature: () => {
@@ -41,10 +45,14 @@ function useFeatures(self: Self, peer: Peer) {
       if (audio) {
         audio.enabled = enabledState;
       }
-      setSelfFeatures((prevState) => ({
-        ...prevState,
-        audio: enabledState,
-      }));
+      setSelfFeatures((prevState) => {
+        const newFeatures = {
+          ...prevState,
+          audio: enabledState,
+        };
+        shareFeatures(newFeatures);
+        return newFeatures;
+      });
     },
     toggleSelfVideoFeature: () => {
       const video = self.mediaTracks.video;
@@ -63,13 +71,27 @@ function useFeatures(self: Self, peer: Peer) {
           displayStream(self.refHtmlVideoElement.current, self.mediaStream);
         }
       }
-      setSelfFeatures((prevState) => ({
-        ...prevState,
-        video: enabledState,
-      }));
+      setSelfFeatures((prevState) => {
+        const newFeatures = {
+          ...prevState,
+          video: enabledState,
+        };
+        shareFeatures(newFeatures);
+        return newFeatures;
+      });
+    },
+    resetSelfFeatures: () => {
+      if (self.mediaTracks.audio) {
+        self.mediaTracks.audio.enabled = false;
+      }
+      if (self.mediaTracks.video) {
+        self.mediaTracks.video.enabled = true;
+        self.mediaStream.addTrack(self.mediaTracks.video);
+      }
+      setSelfFeatures(DEFAULT_PEER_TO_PEER_FEATURES);
     },
     peerFeatures,
-    resetPeerFeatures: () => setSelfFeatures(DEFAULT_PEER_TO_PEER_FEATURES),
+    resetPeerFeatures: () => setPeerFeatures(DEFAULT_PEER_TO_PEER_FEATURES),
     addFeaturesChannel,
   };
 }

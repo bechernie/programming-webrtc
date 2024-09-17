@@ -17,15 +17,20 @@ import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
 function Layout() {
   const { self, peer } = usePeerToPeerContext();
 
-  const [connectionState, setConnectionState] =
-    useState<RTCPeerConnectionState>();
+  const [status, setStatus] = useState<"connected" | "disconnected">(
+    "disconnected",
+  );
 
   const [peerFilter, setPeerFilter] = useState("filter-none");
 
   function onconnectionstatechange() {
     const connectionState = peer.connection.connectionState;
     console.log(`Connection state is now: ${connectionState}`);
-    setConnectionState(connectionState);
+    if (connectionState !== "connected") {
+      setStatus("disconnected");
+    } else {
+      setStatus("connected");
+    }
   }
 
   function ondatachannel({ channel }: RTCDataChannelEvent) {
@@ -88,6 +93,9 @@ function Layout() {
       addChatChannel();
       addFeaturesChannel();
     },
+    () => {
+      setStatus("disconnected");
+    },
   );
 
   return (
@@ -98,8 +106,8 @@ function Layout() {
       </Header>
       <section className={styles.videos}>
         <h2 className={globals.preserveAccessibility}>Streaming Videos</h2>
-        <Self connectionState={connectionState} />
-        <Peer filter={peerFilter} connectionState={connectionState} />
+        <Self status={status} />
+        <Peer filter={peerFilter} status={status} />
       </section>
       <Chat className={styles.chat} />
       <Features className={styles.features} />

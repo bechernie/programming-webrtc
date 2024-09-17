@@ -6,10 +6,10 @@ import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
 
 export interface PeerProps {
   filter: string;
-  connectionState?: RTCPeerConnectionState;
+  status: "connected" | "disconnected";
 }
 
-function Peer({ filter, connectionState }: PeerProps) {
+function Peer({ filter, status }: PeerProps) {
   const { peer } = usePeerToPeerContext();
   const { peerFeatures } = useFeaturesContext();
 
@@ -21,12 +21,9 @@ function Peer({ filter, connectionState }: PeerProps) {
         poster={"placeholder.png"}
         className={videoStyles[filter]}
       />
-      <p
-        className={styles.micStatus}
-        aria-hidden={peerFeatures.audio || connectionState !== "connected"}
-      >
-        Remote peer is muted.
-      </p>
+      {status === "connected" && !peerFeatures.audio && (
+        <p className={styles.micStatus}>Remote peer is muted.</p>
+      )}
     </>
   );
 }

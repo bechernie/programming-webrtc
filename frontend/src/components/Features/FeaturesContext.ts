@@ -14,6 +14,7 @@ export interface FeaturesContext {
   selfFeatures: PeerToPeerFeatures;
   toggleSelfAudioFeature: () => void;
   toggleSelfVideoFeature: () => void;
+  resetSelfFeatures: () => void;
   peerFeatures: PeerToPeerFeatures;
   resetPeerFeatures: () => void;
   addFeaturesChannel: () => void;

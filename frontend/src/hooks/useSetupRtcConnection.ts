@@ -30,9 +30,10 @@ function useSetupRtcConnection(
     ontrack,
   }: RtcCallbacks,
   onEstablishCall: () => void,
+  onLeaveCall: () => void,
 ) {
   const { self, peer } = usePeerToPeerContext();
-  const { resetPeerFeatures } = useFeaturesContext();
+  const { resetSelfFeatures, resetPeerFeatures } = useFeaturesContext();
 
   function onConnect() {
     establishCallFeature();
@@ -144,7 +145,9 @@ function useSetupRtcConnection(
     joinCall,
     leaveCall: () => {
       leaveCall();
+      resetSelfFeatures();
       resetPeer();
+      onLeaveCall();
     },
   };
 }
