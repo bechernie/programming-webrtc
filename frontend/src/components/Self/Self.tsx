@@ -8,12 +8,13 @@ import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.t
 export interface SelfProps {
   connectionState?: RTCPeerConnectionState;
 }
+
 function Self({ connectionState }: SelfProps) {
   const { self, peer } = usePeerToPeerContext();
   const { filter: selfFilter, cycleFilter } = useFilter();
 
   function onSelfVideoClick() {
-    if (peer.connection.connectionState !== "connected") {
+    if (connectionState !== "connected") {
       return;
     }
 
@@ -22,7 +23,7 @@ function Self({ connectionState }: SelfProps) {
 
   useEffect(
     () => {
-      if (peer.connection.connectionState !== "connected") {
+      if (connectionState !== "connected") {
         return;
       }
       const filterDataChannel = peer.connection.createDataChannel(selfFilter);

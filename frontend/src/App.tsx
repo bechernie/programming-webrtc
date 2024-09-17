@@ -24,10 +24,12 @@ function FeatureContextProviderPeerToPeerWrapper({
 }: {
   children?: ReactNode;
 }) {
-  const { self } = usePeerToPeerContext();
+  const { self, peer } = usePeerToPeerContext();
 
   return (
-    <FeaturesContextProvider self={self}>{children}</FeaturesContextProvider>
+    <FeaturesContextProvider self={self} peer={peer}>
+      {children}
+    </FeaturesContextProvider>
   );
 }
 

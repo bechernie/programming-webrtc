@@ -12,6 +12,7 @@ import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.t
 import { useChatContext } from "@components/Chat/ChatContext.ts";
 import displayStream from "@utils/displayStream.ts";
 import Features from "@components/Features/Features.tsx";
+import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
 
 function Layout() {
   const { self, peer } = usePeerToPeerContext();
@@ -73,6 +74,7 @@ function Layout() {
   }
 
   const { addChatChannel } = useChatContext();
+  const { addFeaturesChannel } = useFeaturesContext();
 
   const { joinCall, leaveCall } = usePeerToPeerCall(
     {
@@ -84,6 +86,7 @@ function Layout() {
     },
     () => {
       addChatChannel();
+      addFeaturesChannel();
     },
   );
 
@@ -96,7 +99,7 @@ function Layout() {
       <section className={styles.videos}>
         <h2 className={globals.preserveAccessibility}>Streaming Videos</h2>
         <Self connectionState={connectionState} />
-        <Peer filter={peerFilter} />
+        <Peer filter={peerFilter} connectionState={connectionState} />
       </section>
       <Chat className={styles.chat} />
       <Features className={styles.features} />

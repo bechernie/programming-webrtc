@@ -2,7 +2,7 @@ import useSignalingChannel, { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import exhaustiveSwitch from "@utils/exhaustiveSwitch.ts";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 import displayStream from "@utils/displayStream.ts";
-import { useFeatureContext } from "@components/Features/FeaturesContext.ts";
+import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
 
 export interface RtcCallbacks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +32,7 @@ function useSetupRtcConnection(
   onEstablishCall: () => void,
 ) {
   const { self, peer } = usePeerToPeerContext();
-  const { resetPeerFeatures } = useFeatureContext();
+  const { resetPeerFeatures } = useFeaturesContext();
 
   function onConnect() {
     establishCallFeature();

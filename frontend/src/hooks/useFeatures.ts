@@ -4,17 +4,34 @@ import {
   DEFAULT_PEER_TO_PEER_FEATURES,
   PeerToPeerFeatures,
 } from "@components/Features/FeaturesContext.ts";
-import { Self } from "@utils/types.ts";
+import { Peer, Self } from "@utils/types.ts";
 
-function useFeatures(self: Self) {
+function useFeatures(self: Self, peer: Peer) {
   const [selfFeatures, setSelfFeatures] = useState<PeerToPeerFeatures>(
     DEFAULT_PEER_TO_PEER_FEATURES,
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [peerFeatures, _setPeerFeatures] = useState<PeerToPeerFeatures>(
+  const [peerFeatures, setPeerFeatures] = useState<PeerToPeerFeatures>(
     DEFAULT_PEER_TO_PEER_FEATURES,
   );
+
+  function addFeaturesChannel() {
+    peer.featuresChannel = peer.connection.createDataChannel("features", {
+      negotiated: true,
+      id: 110,
+    });
+    peer.featuresChannel.onopen = function () {
+      console.log("Features channel opened");
+      peer.featuresChannel?.send(JSON.stringify(selfFeatures));
+    };
+    peer.featuresChannel.onmessage = function (event) {
+      const features = JSON.parse(event.data) as PeerToPeerFeatures;
+      setPeerFeatures(features);
+    };
+    peer.featuresChannel.onclose = function () {
+      console.log("Features channel closed");
+    };
+  }
 
   return {
     selfFeatures,
@@ -53,6 +70,7 @@ function useFeatures(self: Self) {
     },
     peerFeatures,
     resetPeerFeatures: () => setSelfFeatures(DEFAULT_PEER_TO_PEER_FEATURES),
+    addFeaturesChannel,
   };
 }
 

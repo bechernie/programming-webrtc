@@ -24,5 +24,6 @@ export interface Self {
 export interface Peer {
   connection: RTCPeerConnection;
   chatChannel?: RTCDataChannel;
+  featuresChannel?: RTCDataChannel;
   refHtmlVideoElement: RefObject<HTMLVideoElement>;
 }

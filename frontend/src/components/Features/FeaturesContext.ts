@@ -14,13 +14,15 @@ export interface FeaturesContext {
   selfFeatures: PeerToPeerFeatures;
   toggleSelfAudioFeature: () => void;
   toggleSelfVideoFeature: () => void;
+  peerFeatures: PeerToPeerFeatures;
   resetPeerFeatures: () => void;
+  addFeaturesChannel: () => void;
 }
 
 export const FeaturesContext = createContext<FeaturesContext>(
   {} as FeaturesContext,
 );
 
-export function useFeatureContext() {
+export function useFeaturesContext() {
   return useContext(FeaturesContext);
 }

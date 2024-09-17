@@ -1,10 +1,10 @@
 import styles from "./Features.module.css";
 import Button from "@components/Button/Button.tsx";
-import { useFeatureContext } from "@components/Features/FeaturesContext.ts";
+import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
 
 function Features({ className }: { className?: string }) {
   const { selfFeatures, toggleSelfAudioFeature, toggleSelfVideoFeature } =
-    useFeatureContext();
+    useFeaturesContext();
 
   return (
     <footer className={[styles.footer, className].filter(Boolean).join(" ")}>
