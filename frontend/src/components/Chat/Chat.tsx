@@ -2,6 +2,7 @@ import { FormEvent } from "react";
 import styles from "./Chat.module.css";
 import globals from "@src/Globals.module.css";
 import { useChatContext } from "@components/Chat/ChatContext.ts";
+import Button from "@components/Button/Button.tsx";
 
 function Chat({ className }: { className?: string }) {
   const { message, setMessage, messages, sendMessage, refMessagesList } =
@@ -51,9 +52,9 @@ function Chat({ className }: { className?: string }) {
           value={message}
           onChange={(event) => setMessage(event.target.value)}
         />
-        <button type={"submit"} id={"chat-button"}>
+        <Button type={"submit"} id={"chat-button"}>
           Send
-        </button>
+        </Button>
       </form>
     </aside>
   );
