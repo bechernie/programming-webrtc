@@ -34,7 +34,9 @@ function useFeatures(self: Self, peer: Peer) {
   }
 
   function shareFeatures(features: PeerToPeerFeatures) {
-    peer.featuresChannel?.send(JSON.stringify(features));
+    if (peer.featuresChannel?.readyState === "open") {
+      peer.featuresChannel?.send(JSON.stringify(features));
+    }
   }
 
   return {
