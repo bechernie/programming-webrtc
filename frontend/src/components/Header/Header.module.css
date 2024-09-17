@@ -1,11 +1,3 @@
-.header {
-  margin-bottom: 0.75rem;
-}
-
-.header > h1 {
-  margin-bottom: 0.75rem;
-}
-
 @media screen and (width >= 500px) {
   .header {
     display: flex;
@@ -16,9 +8,5 @@
 
   .header > * {
     flex: 0 0 auto;
-  }
-
-  .header > h1 {
-    margin-bottom: 0;
   }
 }
