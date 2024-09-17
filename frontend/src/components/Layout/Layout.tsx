@@ -11,16 +11,10 @@ import { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
 import { useChatContext } from "@components/Chat/ChatContext.ts";
 import displayStream from "@utils/displayStream.ts";
-import Button from "@components/Button/Button.tsx";
+import Features from "@components/Features/Features.tsx";
 
 function Layout() {
-  const {
-    self,
-    peer,
-    selfFeatures,
-    toggleSelfAudioFeature,
-    toggleSelfVideoFeature,
-  } = usePeerToPeerContext();
+  const { self, peer } = usePeerToPeerContext();
 
   const [connectionState, setConnectionState] =
     useState<RTCPeerConnectionState>();
@@ -105,26 +99,7 @@ function Layout() {
         <Peer filter={peerFilter} />
       </section>
       <Chat className={styles.chat} />
-      <footer className={styles.footer}>
-        <Button
-          aria-label={"Toggle microphone"}
-          role={"switch"}
-          aria-checked={selfFeatures.audio}
-          type={"button"}
-          onClick={toggleSelfAudioFeature}
-        >
-          Mic
-        </Button>
-        <Button
-          aria-label={"Toggle camera"}
-          role={"switch"}
-          aria-checked={selfFeatures.video}
-          type={"button"}
-          onClick={toggleSelfVideoFeature}
-        >
-          Cam
-        </Button>
-      </footer>
+      <Features className={styles.features} />
     </main>
   );
 }

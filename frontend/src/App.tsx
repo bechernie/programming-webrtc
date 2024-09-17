@@ -3,6 +3,7 @@ import Layout from "@components/Layout/Layout.tsx";
 import ChatContextProvider from "@components/Chat/ChatContextProvider.tsx";
 import PeerToPeerContextProvider from "@components/PeerToPeer/PeerToPeerContextProvider.tsx";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
+import FeaturesContextProvider from "@components/Features/FeaturesContextProvider.tsx";
 
 function ChatContextProviderPeerToPeerWrapper({
   children,
@@ -18,11 +19,25 @@ function ChatContextProviderPeerToPeerWrapper({
   );
 }
 
+function FeatureContextProviderPeerToPeerWrapper({
+  children,
+}: {
+  children?: ReactNode;
+}) {
+  const { self } = usePeerToPeerContext();
+
+  return (
+    <FeaturesContextProvider self={self}>{children}</FeaturesContextProvider>
+  );
+}
+
 function App() {
   return (
     <PeerToPeerContextProvider>
       <ChatContextProviderPeerToPeerWrapper>
-        <Layout />
+        <FeatureContextProviderPeerToPeerWrapper>
+          <Layout />
+        </FeatureContextProviderPeerToPeerWrapper>
       </ChatContextProviderPeerToPeerWrapper>
     </PeerToPeerContextProvider>
   );

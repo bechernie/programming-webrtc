@@ -1,0 +1,14 @@
+.footer {
+  display: flex;
+  column-gap: 0.25rem;
+}
+
+button[aria-checked="false"] {
+  text-decoration: line-through;
+  color: white;
+  background: red;
+}
+
+*[aria-hidden="true"] {
+  visibility: hidden;
+}

@@ -18,21 +18,6 @@ video {
   object-position: center;
 }
 
-.footer {
-  display: flex;
-  column-gap: 0.25rem;
-}
-
-button[aria-checked="false"] {
-  text-decoration: line-through;
-  color: white;
-  background: red;
-}
-
-*[aria-hidden="true"] {
-  visibility: hidden;
-}
-
 @media screen and (width >= 680px) {
   .main {
     grid-template-columns: 1fr 1fr;
@@ -48,7 +33,7 @@ button[aria-checked="false"] {
     grid-row: 2/4;
   }
 
-  .footer {
+  .features {
     grid-column: 1/2;
   }
 }
