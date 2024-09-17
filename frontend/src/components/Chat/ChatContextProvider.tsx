@@ -17,6 +17,8 @@ function ChatContextProvider({
   const {
     message,
     setMessage,
+    image,
+    setImage,
     messages,
     addChatChannel,
     sendMessage,
@@ -28,6 +30,8 @@ function ChatContextProvider({
       value={{
         message,
         setMessage,
+        image,
+        setImage,
         messages,
         addChatChannel,
         sendMessage,

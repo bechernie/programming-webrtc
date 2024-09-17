@@ -1,0 +1,7 @@
+.chatLog {
+  flex-grow: 1;
+  overflow: auto;
+  padding-bottom: 1rem;
+  margin: 0.5rem;
+  min-height: 0;
+}

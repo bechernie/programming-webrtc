@@ -4,8 +4,18 @@ import { Peer, Self } from "@utils/types.ts";
 type Sender = "self" | "peer";
 
 export interface MessageContent {
-  text: string;
-  timestamp: number;
+  message: string;
+  image?: {
+    image: File;
+    metadata: {
+      name: string;
+      size: number;
+      type: string;
+    };
+  };
+  metadata: {
+    timestamp: number;
+  };
 }
 
 export interface MessageResponse {
@@ -22,6 +32,7 @@ export interface Message {
 
 function useChat(self: Self, peer: Peer) {
   const [message, setMessage] = useState("");
+  const [image, setImage] = useState<File>();
   const [messages, setMessages] = useState<Message[]>([]);
 
   const refMessagesList = useRef<HTMLOListElement>(null);
@@ -46,13 +57,26 @@ function useChat(self: Self, peer: Peer) {
   }
 
   function sendMessage() {
-    const messageContent = {
-      text: message,
-      timestamp: Date.now(),
+    const messageContent: MessageContent = {
+      message: message,
+      image: image
+        ? {
+            image: image,
+            metadata: {
+              name: image.name,
+              size: image.size,
+              type: image.type,
+            },
+          }
+        : undefined,
+      metadata: {
+        timestamp: Date.now(),
+      },
     };
     appendMessage("self", messageContent);
     sendOrQueueMessage(messageContent);
     setMessage("");
+    setImage(undefined);
   }
 
   function queueMessage(
@@ -95,7 +119,10 @@ function useChat(self: Self, peer: Peer) {
       if ("id" in message) {
         handleResponse(message);
       } else {
-        sendOrQueueMessage({ id: message.timestamp, timestamp: Date.now() });
+        sendOrQueueMessage({
+          id: message.metadata.timestamp,
+          timestamp: Date.now(),
+        });
         appendMessage("peer", message);
       }
     };
@@ -120,7 +147,7 @@ function useChat(self: Self, peer: Peer) {
     setMessages((prevState) => {
       const newMessages = [...prevState];
       const messageIndex = prevState.findIndex(
-        (message) => message.content.timestamp === response.id,
+        (message) => message.content.metadata.timestamp === response.id,
       );
       if (messageIndex < 0) {
         return newMessages;
@@ -137,6 +164,8 @@ function useChat(self: Self, peer: Peer) {
   return {
     message,
     setMessage,
+    image,
+    setImage,
     messages,
     addChatChannel,
     sendMessage,

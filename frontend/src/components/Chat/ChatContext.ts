@@ -4,6 +4,8 @@ import { Message } from "@hooks/useChat.ts";
 export interface ChatContext {
   message: string;
   setMessage: (message: string) => void;
+  image?: File;
+  setImage: (image?: File) => void;
   messages: Message[];
   addChatChannel: () => void;
   sendMessage: () => void;
