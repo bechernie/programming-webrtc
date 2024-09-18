@@ -20,13 +20,16 @@ function ChatForm() {
     fileRef.current?.click();
   }
 
-  function handleImageInput(event: ChangeEvent<HTMLInputElement>) {
+  async function handleImageInput(event: ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     const image = event.target.files?.[0];
     if (!image) {
       return;
     }
-    setImage(image);
+    setImage({
+      image: await image.arrayBuffer(),
+      name: image.name,
+    });
     inputRef.current?.focus();
   }
 

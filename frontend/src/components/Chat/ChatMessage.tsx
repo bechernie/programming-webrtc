@@ -1,6 +1,6 @@
 import { Message } from "@hooks/useChat.ts";
 import styles from "@components/Chat/ChatMessage.module.css";
-import useFileUrl from "@hooks/useFileUrl.ts";
+import useImageContentUrl from "@hooks/useImageContentUrl.ts";
 
 function ChatMessage({ message }: { message: Message }) {
   const classes = [
@@ -12,7 +12,7 @@ function ChatMessage({ message }: { message: Message }) {
     .filter(Boolean)
     .join(" ");
 
-  const url = useFileUrl(message.content.image?.image);
+  const url = useImageContentUrl(message.content.image);
 
   return (
     <li className={classes}>
@@ -20,7 +20,7 @@ function ChatMessage({ message }: { message: Message }) {
         <img
           src={url}
           className={styles.img}
-          alt={message.content.image.metadata.name}
+          alt={message.content.image.name}
         />
       )}
       <div className={styles.message}>{message.content.message}</div>

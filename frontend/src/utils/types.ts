@@ -1,5 +1,4 @@
 import { RefObject } from "react";
-import { MessageContent, MessageResponse } from "@hooks/useChat.ts";
 
 export interface MediaTracks {
   audio?: MediaStreamTrack;
@@ -17,13 +16,11 @@ export interface Self {
   mediaConstraints: MediaStreamConstraints;
   mediaTracks: MediaTracks;
   mediaStream: MediaStream;
-  messageQueue: (MessageContent | MessageResponse)[];
   refHtmlVideoElement: RefObject<HTMLVideoElement>;
 }
 
 export interface Peer {
   connection: RTCPeerConnection;
-  chatChannel?: RTCDataChannel;
   featuresChannel?: RTCDataChannel;
   refHtmlVideoElement: RefObject<HTMLVideoElement>;
 }

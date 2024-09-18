@@ -2,12 +2,12 @@ import styles from "@components/Chat/ChatInputField.module.css";
 import globals from "@src/Globals.module.css";
 import { useChatContext } from "@components/Chat/ChatContext.ts";
 import { forwardRef } from "react";
-import useFileUrl from "@hooks/useFileUrl.ts";
+import useImageContentUrl from "@hooks/useImageContentUrl.ts";
 
 const ChatInputField = forwardRef<HTMLInputElement>((_props, ref) => {
   const { message, setMessage, image, setImage } = useChatContext();
 
-  const url = useFileUrl(image);
+  const url = useImageContentUrl(image);
 
   return (
     <div className={styles.inputWrapper}>

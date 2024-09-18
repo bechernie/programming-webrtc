@@ -10,6 +10,8 @@
 .peer {
   background: #eeea;
   float: left;
+  display: flex;
+  flex-direction: column;
 }
 
 .self {
@@ -17,6 +19,9 @@
   color: #eee;
   opacity: 0.3;
   float: right;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
 }
 
 .received {
@@ -31,9 +36,4 @@
   display: block;
   max-width: 100%;
   padding: 0;
-}
-
-.message {
-  display: flex;
-  flex-direction: row-reverse;
 }

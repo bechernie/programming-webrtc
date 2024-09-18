@@ -1,27 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import { Peer, Self } from "@utils/types.ts";
+import { Peer } from "@utils/types.ts";
 
 type Sender = "self" | "peer";
 
 export interface MessageContent {
+  id: number;
   message: string;
-  image?: {
-    image: File;
-    metadata: {
-      name: string;
-      size: number;
-      type: string;
-    };
-  };
-  metadata: {
-    timestamp: number;
-  };
+  image?: ImageContent;
 }
 
-export interface MessageResponse {
-  id: number;
-  timestamp: number;
+export interface ImageContent {
+  image: ArrayBuffer;
+  name: string;
 }
+
+export type MessagePayload = {
+  id: number;
+  message: string;
+  image?: {
+    buffer: string;
+    name: string;
+  };
+};
 
 export interface Message {
   sender: Sender;
@@ -30,9 +30,21 @@ export interface Message {
   delayed: boolean;
 }
 
-function useChat(self: Self, peer: Peer) {
+export type Envelope = {
+  payload: Uint8Array;
+  metadata: Metadata;
+};
+
+export type Metadata = {
+  id: number;
+  kind: "response" | "message";
+  timestamp: number;
+  size: number;
+};
+
+function useChat(peer: Peer) {
   const [message, setMessage] = useState("");
-  const [image, setImage] = useState<File>();
+  const [image, setImage] = useState<ImageContent>();
   const [messages, setMessages] = useState<Message[]>([]);
 
   const refMessagesList = useRef<HTMLOListElement>(null);
@@ -50,104 +62,146 @@ function useChat(self: Self, peer: Peer) {
       {
         sender: sender,
         content: message,
+        image: image,
         acknowledged: false,
         delayed: false,
       },
     ]);
   }
 
-  function sendMessage() {
-    const messageContent: MessageContent = {
+  async function sendMessage() {
+    const timestamp = Date.now();
+
+    if (!message && !image) {
+      return;
+    }
+
+    appendMessage("self", {
+      id: timestamp,
       message: message,
-      image: image
-        ? {
-            image: image,
-            metadata: {
-              name: image.name,
-              size: image.size,
-              type: image.type,
-            },
-          }
-        : undefined,
-      metadata: {
-        timestamp: Date.now(),
-      },
-    };
-    appendMessage("self", messageContent);
-    sendOrQueueMessage(messageContent);
+      image: image,
+    });
+
+    const imagePayload = image?.image
+      ? {
+          buffer: btoa(String.fromCharCode(...new Uint8Array(image.image))),
+          name: image.name,
+        }
+      : undefined;
+
+    sendOrQueueMessage({
+      id: timestamp,
+      message: message,
+      image: imagePayload,
+    });
+
     setMessage("");
     setImage(undefined);
   }
 
-  function queueMessage(
-    message: MessageContent | MessageResponse,
-    push = true,
-  ) {
-    if (push) {
-      self.messageQueue.push(message);
-    } else {
-      self.messageQueue.unshift(message);
-    }
-  }
+  function sendOrQueueMessage(payload: MessagePayload) {
+    const timestamp = Date.now();
 
-  function sendOrQueueMessage(
-    message: MessageContent | MessageResponse,
-    push = true,
-  ) {
-    const chatChannel = peer.chatChannel;
-    if (!chatChannel || chatChannel.readyState !== "open") {
-      queueMessage(message, push);
-      return;
-    }
-    try {
-      peer.chatChannel?.send(JSON.stringify(message));
-    } catch (e) {
-      console.log("Error sending message:", e);
-      queueMessage(message, push);
-    }
-  }
+    const messagePayload = new TextEncoder().encode(JSON.stringify(payload));
 
-  function addChatChannel() {
-    peer.chatChannel = peer.connection.createDataChannel("text-chat", {
-      negotiated: true,
-      id: 100,
+    sendOrQueueEnvelope({
+      payload: messagePayload,
+      metadata: {
+        id: timestamp,
+        kind: "message",
+        timestamp: timestamp,
+        size: messagePayload.byteLength,
+      },
     });
-    peer.chatChannel.onmessage = function (event) {
-      const message = JSON.parse(event.data) as
-        | MessageContent
-        | MessageResponse;
-      if ("id" in message) {
-        handleResponse(message);
-      } else {
-        sendOrQueueMessage({
-          id: message.metadata.timestamp,
-          timestamp: Date.now(),
-        });
-        appendMessage("peer", message);
+  }
+
+  function sendOrQueueResponse(id: number) {
+    const timestamp = Date.now();
+
+    const responsePayload = new TextEncoder().encode(JSON.stringify({}));
+
+    sendOrQueueEnvelope({
+      payload: responsePayload,
+      metadata: {
+        id: id,
+        kind: "response",
+        timestamp: timestamp,
+        size: responsePayload.byteLength,
+      },
+    });
+  }
+
+  function sendOrQueueEnvelope(envelope: Envelope) {
+    const chatChannel = peer.connection.createDataChannel(
+      `chat-${envelope.metadata.kind}-${envelope.metadata.id}`,
+    );
+    const chunk = 16 * 1024;
+    chatChannel.onopen = function () {
+      chatChannel.send(JSON.stringify(envelope.metadata));
+      chatChannel.binaryType = "arraybuffer";
+      try {
+        for (let i = 0; i < envelope.payload.length; i += chunk) {
+          chatChannel.send(envelope.payload.slice(i, i + chunk));
+        }
+      } catch (e) {
+        console.log("Error sending message:", e);
       }
     };
-    peer.chatChannel.onclose = function () {
-      console.log("Chat channel closed");
-    };
-    peer.chatChannel.onopen = function () {
-      console.log("Chat channel opened");
-      while (
-        self.messageQueue.length > 0 &&
-        peer.chatChannel?.readyState === "open"
-      ) {
-        const message = self.messageQueue.shift();
-        if (message) {
-          sendOrQueueMessage(message, false);
+  }
+
+  function receiveMessage(channel: RTCDataChannel) {
+    const chunks: BlobPart[] = [];
+    let metadata: Metadata;
+    let bytesReceived = 0;
+
+    channel.onmessage = async function ({ data }) {
+      if (typeof data === "string" && data.startsWith("{")) {
+        metadata = JSON.parse(data) as Metadata;
+      } else {
+        bytesReceived += data.size ? data.size : data.byteLength;
+        chunks.push(data);
+
+        if (bytesReceived !== metadata.size) {
+          return;
+        }
+
+        const payload = new Blob(chunks);
+        const message = JSON.parse(
+          new TextDecoder().decode(new Uint8Array(await payload.arrayBuffer())),
+        ) as MessagePayload;
+
+        if (metadata.kind === "response") {
+          handleResponse(metadata);
+        } else {
+          let image: ImageContent | undefined;
+
+          if (message.image) {
+            const imageInput =
+              "data:application/octet-stream;base64," + message.image.buffer;
+            const arraybuffer = await (await fetch(imageInput)).arrayBuffer();
+            image = {
+              image: arraybuffer,
+              name: message.image.name,
+            };
+          }
+
+          appendMessage("peer", {
+            id: message.id,
+            message: message.message,
+            image: image,
+          });
+
+          sendOrQueueResponse(message.id);
         }
       }
     };
   }
 
-  function handleResponse(response: MessageResponse) {
+  function handleResponse(response: Metadata) {
     setMessages((prevState) => {
       const newMessages = [...prevState];
       const messageIndex = prevState.findIndex(
-        (message) => message.content.metadata.timestamp === response.id,
+        (message) => message.content.id === response.id,
       );
       if (messageIndex < 0) {
         return newMessages;
@@ -167,8 +221,8 @@ function useChat(self: Self, peer: Peer) {
     image,
     setImage,
     messages,
-    addChatChannel,
     sendMessage,
+    receiveMessage,
     refMessagesList,
   };
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { ImageContent } from "@hooks/useChat.ts";
 
-function useFileUrl(file?: File) {
+function useImageContentUrl(imageContent?: ImageContent) {
   const [url, setUrl] = useState<string>();
 
   useEffect(
@@ -9,15 +10,15 @@ function useFileUrl(file?: File) {
         URL.revokeObjectURL(url);
       }
 
-      if (file) {
-        setUrl(URL.createObjectURL(file));
+      if (imageContent) {
+        setUrl(URL.createObjectURL(new Blob([imageContent.image])));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [file],
+    [imageContent],
   );
 
   return url;
 }
 
-export default useFileUrl;
+export default useImageContentUrl;

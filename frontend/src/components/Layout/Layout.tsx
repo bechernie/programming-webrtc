@@ -9,10 +9,10 @@ import Peer from "@components/Peer/Peer.tsx";
 import usePeerToPeerCall from "@hooks/useSetupRtcConnection.ts";
 import { RTCSignal } from "@hooks/useSignalingChannel.ts";
 import { usePeerToPeerContext } from "@components/PeerToPeer/PeerToPeerContext.ts";
-import { useChatContext } from "@components/Chat/ChatContext.ts";
 import displayStream from "@utils/displayStream.ts";
 import Features from "@components/Features/Features.tsx";
 import { useFeaturesContext } from "@components/Features/FeaturesContext.ts";
+import { useChatContext } from "@components/Chat/ChatContext.ts";
 
 function Layout() {
   const { self, peer } = usePeerToPeerContext();
@@ -20,6 +20,8 @@ function Layout() {
   const [status, setStatus] = useState<"connected" | "disconnected">(
     "disconnected",
   );
+
+  const { receiveMessage } = useChatContext();
 
   const [peerFilter, setPeerFilter] = useState("filter-none");
 
@@ -40,6 +42,8 @@ function Layout() {
       channel.onopen = function () {
         channel.close();
       };
+    } else if (label.startsWith("chat-")) {
+      receiveMessage(channel);
     } else {
       console.log(
         `Opened ${channel.label} channel with an ID of ${channel.id}`,
@@ -78,7 +82,6 @@ function Layout() {
     displayStream(peer.refHtmlVideoElement.current, stream);
   }
 
-  const { addChatChannel } = useChatContext();
   const { addFeaturesChannel } = useFeaturesContext();
 
   const { joinCall, leaveCall } = usePeerToPeerCall(
@@ -90,7 +93,6 @@ function Layout() {
       ontrack,
     },
     () => {
-      addChatChannel();
       addFeaturesChannel();
     },
     () => {

@@ -1,14 +1,14 @@
 import { createContext, RefObject, useContext } from "react";
-import { Message } from "@hooks/useChat.ts";
+import { ImageContent, Message } from "@hooks/useChat.ts";
 
 export interface ChatContext {
   message: string;
   setMessage: (message: string) => void;
-  image?: File;
-  setImage: (image?: File) => void;
+  image?: ImageContent;
+  setImage: (image?: ImageContent) => void;
   messages: Message[];
-  addChatChannel: () => void;
   sendMessage: () => void;
+  receiveMessage: (channel: RTCDataChannel) => void;
   refMessagesList: RefObject<HTMLOListElement>;
 }
 
