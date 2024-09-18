@@ -21,7 +21,7 @@ function Layout() {
     "disconnected",
   );
 
-  const { receiveMessage } = useChatContext();
+  const { addChatChannel } = useChatContext();
 
   const [peerFilter, setPeerFilter] = useState("filter-none");
 
@@ -42,8 +42,6 @@ function Layout() {
       channel.onopen = function () {
         channel.close();
       };
-    } else if (label.startsWith("chat-")) {
-      receiveMessage(channel);
     } else {
       console.log(
         `Opened ${channel.label} channel with an ID of ${channel.id}`,
@@ -93,6 +91,7 @@ function Layout() {
       ontrack,
     },
     () => {
+      addChatChannel();
       addFeaturesChannel();
     },
     () => {

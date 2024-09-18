@@ -18,7 +18,7 @@ function PeerToPeerContextProvider({ children }: { children?: ReactNode }) {
     },
     mediaTracks: DEFAULT_MEDIA_TRACKS,
     mediaStream: new MediaStream(),
-    messageQueue: [],
+    messageEnvelopeQueue: [],
     refHtmlVideoElement: selfVideoElement,
   });
 

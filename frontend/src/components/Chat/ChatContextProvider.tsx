@@ -1,14 +1,19 @@
 import { ReactNode } from "react";
 import useChat from "@hooks/useChat.ts";
-import { Peer } from "@utils/types.ts";
+import { Peer, Self } from "@utils/types.ts";
 import { ChatContext } from "./ChatContext";
 
 export interface ChatContextProviderProps {
+  self: Self;
   peer: Peer;
   children?: ReactNode;
 }
 
-function ChatContextProvider({ peer, children }: ChatContextProviderProps) {
+function ChatContextProvider({
+  self,
+  peer,
+  children,
+}: ChatContextProviderProps) {
   const {
     message,
     setMessage,
@@ -16,9 +21,9 @@ function ChatContextProvider({ peer, children }: ChatContextProviderProps) {
     setImage,
     messages,
     sendMessage,
-    receiveMessage,
+    addChatChannel,
     refMessagesList,
-  } = useChat(peer);
+  } = useChat(self, peer);
 
   return (
     <ChatContext.Provider
@@ -29,7 +34,7 @@ function ChatContextProvider({ peer, children }: ChatContextProviderProps) {
         setImage,
         messages,
         sendMessage,
-        receiveMessage,
+        addChatChannel,
         refMessagesList,
       }}
     >

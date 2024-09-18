@@ -10,9 +10,13 @@ function ChatContextProviderPeerToPeerWrapper({
 }: {
   children?: ReactNode;
 }) {
-  const { peer } = usePeerToPeerContext();
+  const { self, peer } = usePeerToPeerContext();
 
-  return <ChatContextProvider peer={peer}>{children}</ChatContextProvider>;
+  return (
+    <ChatContextProvider self={self} peer={peer}>
+      {children}
+    </ChatContextProvider>
+  );
 }
 
 function FeatureContextProviderPeerToPeerWrapper({

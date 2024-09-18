@@ -8,7 +8,7 @@ export interface ChatContext {
   setImage: (image?: ImageContent) => void;
   messages: Message[];
   sendMessage: () => void;
-  receiveMessage: (channel: RTCDataChannel) => void;
+  addChatChannel: () => void;
   refMessagesList: RefObject<HTMLOListElement>;
 }
 
